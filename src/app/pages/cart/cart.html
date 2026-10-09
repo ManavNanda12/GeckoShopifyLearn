@@ -1,0 +1,113 @@
+@let cart = cart$ | async;
+
+<h1 class="h3 mb-4">Your Cart</h1>
+
+@if (errorMessage) {
+  <div class="alert alert-danger">{{ errorMessage }}</div>
+}
+
+@if (cart && cart.totalQuantity > 0) {
+  <div class="row g-4">
+    <!-- Items: full width on phones, 8/12 on large screens -->
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm">
+        <ul class="list-group list-group-flush">
+          @for (line of getLines(cart); track line.id) {
+            <li class="list-group-item py-3" [class.opacity-50]="busyLineId === line.id">
+              <div class="row align-items-center g-3">
+                <!-- Image -->
+                <div class="col-3 col-md-2">
+                  @if (line.merchandise.image) {
+                    <img class="img-fluid rounded" [src]="line.merchandise.image.url"
+                      [alt]="line.merchandise.image.altText ?? line.merchandise.product.title">
+                  } @else {
+                    <div class="no-image rounded d-flex align-items-center justify-content-center text-muted small">
+                      No image
+                    </div>
+                  }
+                </div>
+
+                <!-- Title, variant, unit price -->
+                <div class="col-9 col-md-4">
+                  <a class="fw-semibold text-decoration-none" [routerLink]="['/products', line.merchandise.product.handle]">
+                    {{ line.merchandise.product.title }}
+                  </a>
+                  @if (line.merchandise.title !== 'Default Title') {
+                    <div class="small text-muted">{{ line.merchandise.title }}</div>
+                  }
+                  <div class="small text-muted">
+                    {{ toNumber(line.cost.amountPerQuantity.amount) | currency: line.cost.amountPerQuantity.currencyCode }} each
+                  </div>
+                </div>
+
+                <!-- Quantity -->
+                <div class="col-7 col-md-3">
+                  <div class="input-group input-group-sm quantity-group">
+                    <button class="btn btn-outline-secondary" type="button" (click)="decrease(line)"
+                      [disabled]="busyLineId === line.id"
+                      [attr.aria-label]="line.quantity === 1 ? 'Remove item' : 'Decrease quantity'">−</button>
+                    <span class="input-group-text bg-white justify-content-center flex-grow-1">
+                      @if (busyLineId === line.id) {
+                        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                      } @else {
+                        {{ line.quantity }}
+                      }
+                    </span>
+                    <button class="btn btn-outline-secondary" type="button" (click)="increase(line)"
+                      [disabled]="busyLineId === line.id" aria-label="Increase quantity">+</button>
+                  </div>
+                </div>
+
+                <!-- Line total + remove -->
+                <div class="col-5 col-md-3 text-end">
+                  <div class="fw-semibold">
+                    {{ toNumber(line.cost.totalAmount.amount) | currency: line.cost.totalAmount.currencyCode }}
+                  </div>
+                  <button class="btn btn-link btn-sm text-danger p-0" type="button" (click)="remove(line)"
+                    [disabled]="busyLineId === line.id">Remove</button>
+                </div>
+              </div>
+            </li>
+          }
+        </ul>
+      </div>
+
+      <a class="btn btn-link px-0 mt-2" routerLink="/products">← Continue shopping</a>
+    </div>
+
+    <!-- Summary -->
+    <div class="col-12 col-lg-4">
+      <div class="card shadow-sm summary">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Order Summary</h2>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Items</span>
+            <span>{{ cart.totalQuantity }}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Subtotal</span>
+            <span>{{ toNumber(cart.cost.subtotalAmount.amount) | currency: cart.cost.subtotalAmount.currencyCode }}</span>
+          </div>
+          <div class="d-flex justify-content-between text-muted small mb-3">
+            <span>Shipping &amp; taxes</span>
+            <span>Calculated at checkout</span>
+          </div>
+          <hr>
+          <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
+            <span>Total</span>
+            <span>{{ toNumber(cart.cost.totalAmount.amount) | currency: cart.cost.totalAmount.currencyCode }}</span>
+          </div>
+          <a class="btn btn-primary btn-lg w-100" [href]="cart.checkoutUrl"
+            [class.disabled]="!!busyLineId">Checkout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="text-center py-5">
+    <p class="fs-1 mb-2">🛒</p>
+    <h2 class="h4">Your cart is empty</h2>
+    <p class="text-muted">Looks like you haven't added anything yet.</p>
+    <a class="btn btn-primary" routerLink="/products">Start Shopping</a>
+  </div>
+}

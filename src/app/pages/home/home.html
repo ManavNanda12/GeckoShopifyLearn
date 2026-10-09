@@ -1,0 +1,100 @@
+<!-- ================= Hero ================= -->
+<section class="hero rounded-4 overflow-hidden mb-5 text-white">
+  <div class="row g-0 align-items-center">
+    <div class="col-12 col-md-6 p-4 p-md-5">
+      <span class="badge rounded-pill bg-white text-success mb-3">❄️ Winter 2026 Collection</span>
+      <h1 class="display-5 fw-bold lh-sm">Ride further.<br>Carve harder.</h1>
+      <p class="lead opacity-75 my-3">Premium snowboards and gear, hand-picked for every rider and every mountain.</p>
+      <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-light btn-lg fw-semibold" routerLink="/products">Shop Now</a>
+        <a class="btn btn-outline-light btn-lg" routerLink="/products" [queryParams]="{ type: 'snowboard' }">Snowboards</a>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 hero-image-wrap">
+      @if (heroImage) {
+        <img class="hero-image" [src]="heroImage" alt="Featured snowboard">
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ================= Perks ================= -->
+<section class="row g-3 mb-5 text-center">
+  <div class="col-6 col-md-3">
+    <div class="perk rounded-4 p-3 h-100"><div class="fs-2">🚚</div><div class="fw-semibold">Free shipping</div><small class="text-muted">On orders over $100</small></div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="perk rounded-4 p-3 h-100"><div class="fs-2">↩️</div><div class="fw-semibold">Easy returns</div><small class="text-muted">30-day return policy</small></div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="perk rounded-4 p-3 h-100"><div class="fs-2">🔒</div><div class="fw-semibold">Secure checkout</div><small class="text-muted">Powered by Shopify</small></div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="perk rounded-4 p-3 h-100"><div class="fs-2">🏔️</div><div class="fw-semibold">Rider tested</div><small class="text-muted">Gear we actually ride</small></div>
+  </div>
+</section>
+
+@if (isLoading) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-success" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+} @else if (errorMessage) {
+  <div class="alert alert-danger">{{ errorMessage }}</div>
+} @else {
+
+  <!-- ================= Categories ================= -->
+  @if (categories.length) {
+    <section class="mb-5">
+      <h2 class="h4 fw-bold mb-3">Shop by category</h2>
+      <div class="row g-3">
+        @for (category of categories; track category.name) {
+          <div class="col-6 col-md-4 col-lg-3">
+            <a class="category-tile rounded-4 d-block position-relative overflow-hidden text-white text-decoration-none"
+              routerLink="/products" [queryParams]="{ type: category.name }">
+              @if (category.image) {
+                <img [src]="category.image" [alt]="category.name" loading="lazy">
+              }
+              <div class="category-label position-absolute bottom-0 start-0 end-0 p-3">
+                <div class="fw-bold text-capitalize fs-5">{{ category.name }}</div>
+                <small>{{ category.count }} {{ category.count === 1 ? 'product' : 'products' }} →</small>
+              </div>
+            </a>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- ================= Featured ================= -->
+  <section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="h4 fw-bold mb-0">Featured Products</h2>
+      <a class="text-success fw-semibold text-decoration-none" routerLink="/products">View all →</a>
+    </div>
+    <div class="row g-3 g-md-4">
+      @for (product of featuredProducts; track product.id) {
+        <div class="col-6 col-lg-3">
+          <app-product-card [product]="product" />
+        </div>
+      } @empty {
+        <div class="col-12"><div class="alert alert-info">No featured products right now.</div></div>
+      }
+    </div>
+  </section>
+
+  <!-- ================= On sale ================= -->
+  @if (saleProducts.length) {
+    <section class="sale-section rounded-4 p-4 mb-5">
+      <h2 class="h4 fw-bold mb-3">🔥 On sale now</h2>
+      <div class="row g-3 g-md-4">
+        @for (product of saleProducts; track product.id) {
+          <div class="col-6 col-lg-3">
+            <app-product-card [product]="product" />
+          </div>
+        }
+      </div>
+    </section>
+  }
+}

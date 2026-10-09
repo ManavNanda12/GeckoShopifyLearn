@@ -1,0 +1,16 @@
+.quantity-group {
+  max-width: 130px;
+}
+
+.no-image {
+  aspect-ratio: 1;
+  background-color: var(--bs-light);
+}
+
+/* Keep the summary visible while scrolling long carts on large screens */
+@media (min-width: 992px) {
+  .summary {
+    position: sticky;
+    top: 1rem;
+  }
+}

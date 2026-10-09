@@ -1,0 +1,74 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex: 1;
+}
+
+/* ---------- CSS-only logo ---------- */
+/* A tilted green "leaf" tile with a G and a little gecko eye */
+.brand-mark {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 14px 14px 14px 4px;
+  background: linear-gradient(135deg, #4ade80, #16a34a 50%, #0ea5e9);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.45);
+  transform: rotate(-8deg);
+}
+
+.brand-mark::before {
+  content: 'G';
+  color: #fff;
+  font-weight: 900;
+  font-size: 1.25rem;
+  line-height: 1;
+  transform: rotate(8deg);
+}
+
+/* Eye */
+.brand-mark::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #facc15;
+  border: 2px solid #fff;
+}
+
+.brand-name {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-size: 1.25rem;
+}
+
+.brand-accent {
+  color: #4ade80;
+}
+
+.brand:hover .brand-mark {
+  transform: rotate(4deg) scale(1.05);
+  transition: transform 0.2s ease;
+}
+
+/* ---------- Footer ---------- */
+.site-footer a {
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  color: #fff;
+}
+
+.site-footer li {
+  margin-bottom: 0.35rem;
+}

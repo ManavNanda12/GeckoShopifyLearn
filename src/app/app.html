@@ -1,0 +1,72 @@
+<!-- Navbar: sticks to the top, collapses into a hamburger menu on small screens -->
+<nav class="navbar navbar-expand-md navbar-dark bg-dark sticky-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand brand d-flex align-items-center gap-2" routerLink="/home">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">Gecko <span class="brand-accent">Store</span></span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+      aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav ms-auto align-items-md-center gap-md-2">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/home" routerLinkActive="active">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/products" routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: false }">Products</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link cart-link" routerLink="/cart" routerLinkActive="active">
+            🛒 Cart
+            @let cart = cart$ | async;
+            @if (cart && cart.totalQuantity > 0) {
+              <span class="badge rounded-pill bg-success ms-1">{{ cart.totalQuantity }}</span>
+            }
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Routed pages are rendered here -->
+<main class="container py-4">
+  <router-outlet />
+</main>
+
+<footer class="site-footer bg-dark text-white-50 pt-5 pb-3 mt-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-12 col-md-5">
+        <div class="brand d-flex align-items-center gap-2 mb-2">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span class="brand-name text-white">Gecko <span class="brand-accent">Store</span></span>
+        </div>
+        <p class="small mb-0">Premium snowboards and winter gear. Built on Angular + Shopify Storefront API.</p>
+      </div>
+      <div class="col-6 col-md-3">
+        <h3 class="h6 text-white">Shop</h3>
+        <ul class="list-unstyled small mb-0">
+          <li><a routerLink="/products">All products</a></li>
+          <li><a routerLink="/products" [queryParams]="{ type: 'snowboard' }">Snowboards</a></li>
+          <li><a routerLink="/products" [queryParams]="{ type: 'accessories' }">Accessories</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md-4">
+        <h3 class="h6 text-white">Help</h3>
+        <ul class="list-unstyled small mb-0">
+          <li><a routerLink="/cart">Your cart</a></li>
+          <li><a routerLink="/order-confirmation">Order status</a></li>
+          <li>Free shipping over $100</li>
+        </ul>
+      </div>
+    </div>
+    <hr class="border-secondary my-4">
+    <p class="small text-center mb-0">&copy; 2026 {{ title }}. All rights reserved.</p>
+  </div>
+</footer>

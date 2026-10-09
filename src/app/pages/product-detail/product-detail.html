@@ -1,0 +1,299 @@
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a routerLink="/home">Home</a></li>
+    <li class="breadcrumb-item"><a routerLink="/products">Products</a></li>
+    @if (product?.productType) {
+      <li class="breadcrumb-item text-capitalize">
+        <a routerLink="/products" [queryParams]="{ type: product?.productType }">{{ product?.productType }}</a>
+      </li>
+    }
+    <li class="breadcrumb-item active" aria-current="page">
+      {{ isLoading ? 'Loading...' : (product?.title ?? 'Not found') }}
+    </li>
+  </ol>
+</nav>
+
+@if (isLoading) {
+  <div class="row g-4">
+    <div class="col-12 col-lg-7"><div class="skeleton rounded-4 ratio ratio-1x1"></div></div>
+    <div class="col-12 col-lg-5">
+      <div class="skeleton rounded mb-3" style="height: 2rem; width: 70%"></div>
+      <div class="skeleton rounded mb-3" style="height: 1.5rem; width: 30%"></div>
+      <div class="skeleton rounded" style="height: 8rem"></div>
+    </div>
+  </div>
+} @else if (errorMessage) {
+  <div class="alert alert-danger">{{ errorMessage }}</div>
+} @else if (product) {
+  <div class="row g-4 g-lg-5">
+
+    <!-- ================= Gallery ================= -->
+    <div class="col-12 col-lg-7">
+      <div class="gallery-main rounded-4 position-relative" [class.zooming]="isZooming"
+        (mousemove)="onImageMouseMove($event)" (mouseleave)="onImageMouseLeave()">
+        @if (activeImage) {
+          <img [src]="activeImage.url" [alt]="activeImage.altText ?? product.title"
+            [style.transform-origin]="zoomOrigin">
+
+          <button type="button" class="btn btn-light btn-sm rounded-pill expand-btn position-absolute top-0 end-0 m-3"
+            data-bs-toggle="modal" data-bs-target="#imageModal" aria-label="View full size">⛶ Full size</button>
+
+          @if (images.length > 1) {
+            <button type="button" class="nav-arrow prev" (click)="previousImage()" aria-label="Previous image">‹</button>
+            <button type="button" class="nav-arrow next" (click)="nextImage()" aria-label="Next image">›</button>
+            <span class="badge text-bg-dark position-absolute bottom-0 start-0 m-3 opacity-75">
+              {{ activeImageIndex + 1 }} / {{ images.length }}
+            </span>
+          }
+        } @else {
+          <div class="no-image h-100 d-flex flex-column align-items-center justify-content-center text-muted">
+            <span class="display-1">🏂</span>
+            <span>No image available</span>
+          </div>
+        }
+      </div>
+
+      <!-- Thumbnails -->
+      @if (images.length > 1) {
+        <div class="thumbs d-flex gap-2 mt-3">
+          @for (image of images; track image.url; let i = $index) {
+            <button type="button" class="thumb rounded-3 p-0" [class.active]="i === activeImageIndex"
+              (click)="selectImage(i)" [attr.aria-label]="'Show image ' + (i + 1)">
+              <img [src]="image.thumbUrl" [alt]="image.altText ?? product.title" loading="lazy">
+            </button>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- ================= Info ================= -->
+    <div class="col-12 col-lg-5">
+      <div class="info-sticky">
+        @if (product.vendor) {
+          <small class="vendor text-uppercase text-success fw-semibold">{{ product.vendor }}</small>
+        }
+        <h1 class="h2 fw-bold mt-1">{{ product.title }}</h1>
+
+        <!-- Price -->
+        @if (selectedVariant) {
+          <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+            <span class="fs-2 fw-bold" [class.text-danger]="discount > 0">
+              {{ toNumber(selectedVariant.price.amount) | currency: selectedVariant.price.currencyCode }}
+            </span>
+            @if (discount > 0 && selectedVariant.compareAtPrice) {
+              <span class="fs-5 text-muted text-decoration-line-through">
+                {{ toNumber(selectedVariant.compareAtPrice.amount) | currency: selectedVariant.compareAtPrice.currencyCode }}
+              </span>
+              <span class="badge text-bg-danger">-{{ discount }}%</span>
+            }
+          </div>
+          @if (savings > 0) {
+            <p class="text-danger small mb-2">You save {{ savings | currency: selectedVariant.price.currencyCode }}</p>
+          }
+
+          <!-- Stock -->
+          @if (selectedVariant.availableForSale) {
+            <p class="stock in-stock small fw-semibold mb-3"><span class="dot"></span>In stock, ready to ship</p>
+          } @else {
+            <p class="stock sold-out small fw-semibold mb-3"><span class="dot"></span>Sold out</p>
+          }
+        }
+
+        <!-- Options (e.g. Color: Ice / Dawn / ...) -->
+        @if (hasRealVariants) {
+          @for (option of product.options; track option.name) {
+            <div class="mb-3">
+              <p class="fw-semibold mb-2">
+                {{ option.name }}: <span class="fw-normal text-muted">{{ selectedOptions[option.name] }}</span>
+              </p>
+              <div class="d-flex flex-wrap gap-2">
+                @for (value of option.optionValues; track value.name) {
+                  @let swatch = swatchImage(option.name, value.name);
+                  <button type="button" class="option-btn btn btn-sm d-flex align-items-center gap-2"
+                    [class.selected]="selectedOptions[option.name] === value.name"
+                    [class.unavailable]="!isValueAvailable(option.name, value.name)"
+                    [title]="isValueAvailable(option.name, value.name) ? value.name : value.name + ' (sold out)'"
+                    (click)="selectOption(option.name, value.name)">
+                    @if (swatch) {
+                      <img class="swatch rounded-circle" [src]="swatch" alt="">
+                    }
+                    {{ value.name }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        }
+
+        <!-- Quantity + Add to cart -->
+        @if (selectedVariant?.availableForSale) {
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            <div class="input-group quantity-group">
+              <button class="btn btn-outline-secondary" type="button" (click)="decreaseQuantity()"
+                [disabled]="quantity <= 1 || isAddingToCart" aria-label="Decrease quantity">−</button>
+              <span class="input-group-text bg-white justify-content-center flex-grow-1">{{ quantity }}</span>
+              <button class="btn btn-outline-secondary" type="button" (click)="increaseQuantity()"
+                [disabled]="isAddingToCart" aria-label="Increase quantity">+</button>
+            </div>
+            <button class="btn btn-success btn-lg flex-grow-1" type="button" (click)="addToCart()"
+              [disabled]="isAddingToCart">
+              @if (isAddingToCart) {
+                <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> Adding...
+              } @else {
+                Add to Cart
+              }
+            </button>
+          </div>
+        } @else {
+          <button class="btn btn-secondary btn-lg w-100 mb-3" type="button" disabled>Sold Out</button>
+        }
+
+        <!-- Cart feedback -->
+        @if (cartMessage && cart) {
+          <div class="alert alert-success d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <span>✓ {{ cartMessage }} Cart now has <strong>{{ cart.totalQuantity }}</strong> item(s).</span>
+            <a class="btn btn-success btn-sm" routerLink="/cart">View Cart</a>
+          </div>
+        }
+        @if (cartError) {
+          <div class="alert alert-danger">{{ cartError }}</div>
+        }
+
+        <!-- Trust badges -->
+        <div class="row g-2 text-center small my-3">
+          <div class="col-4">
+            <div class="trust rounded-3 p-2 h-100"><div class="fs-4">🚚</div>Free shipping over $100</div>
+          </div>
+          <div class="col-4">
+            <div class="trust rounded-3 p-2 h-100"><div class="fs-4">↩️</div>30-day returns</div>
+          </div>
+          <div class="col-4">
+            <div class="trust rounded-3 p-2 h-100"><div class="fs-4">🔒</div>Secure checkout</div>
+          </div>
+        </div>
+
+        <!-- Details accordion (Bootstrap JS) -->
+        <div class="accordion" id="productAccordion">
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#descPanel"
+                aria-expanded="true" aria-controls="descPanel">Description</button>
+            </h2>
+            <div id="descPanel" class="accordion-collapse collapse show" data-bs-parent="#productAccordion">
+              <div class="accordion-body">
+                @if (product.descriptionHtml) {
+                  <div class="description" [innerHTML]="product.descriptionHtml"></div>
+                } @else {
+                  <p class="mb-0">
+                    The {{ product.title }} by {{ product.vendor }} is built for riders who want dependable
+                    performance on every run. Check the details below for everything you need to know.
+                  </p>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#detailsPanel"
+                aria-expanded="false" aria-controls="detailsPanel">Product details</button>
+            </h2>
+            <div id="detailsPanel" class="accordion-collapse collapse" data-bs-parent="#productAccordion">
+              <div class="accordion-body">
+                <table class="table table-sm mb-0 small">
+                  <tbody>
+                    <tr><th class="w-25">Brand</th><td>{{ product.vendor }}</td></tr>
+                    @if (product.productType) {
+                      <tr><th>Category</th><td class="text-capitalize">{{ product.productType }}</td></tr>
+                    }
+                    @if (hasRealVariants) {
+                      @for (option of product.options; track option.name) {
+                        <tr>
+                          <th>{{ option.name }}</th>
+                          <td>
+                            @for (value of option.optionValues; track value.name; let last = $last) {
+                              {{ value.name }}{{ last ? '' : ', ' }}
+                            }
+                          </td>
+                        </tr>
+                      }
+                    }
+                    <tr><th>Variants</th><td>{{ variants.length }}</td></tr>
+                    <tr><th>Handle</th><td><code>{{ product.handle }}</code></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#shippingPanel"
+                aria-expanded="false" aria-controls="shippingPanel">Shipping &amp; returns</button>
+            </h2>
+            <div id="shippingPanel" class="accordion-collapse collapse" data-bs-parent="#productAccordion">
+              <div class="accordion-body small">
+                <ul class="mb-0 ps-3">
+                  <li>Free standard shipping on orders over $100.</li>
+                  <li>Orders ship within 1–2 business days.</li>
+                  <li>Unused items can be returned within 30 days.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        @if (product.tags.length) {
+          <div class="d-flex flex-wrap gap-1 mt-3">
+            @for (tag of product.tags; track tag) {
+              <span class="badge rounded-pill text-bg-light border">#{{ tag }}</span>
+            }
+          </div>
+        }
+
+        <a class="d-inline-block small mt-3" [href]="shopifyUrl" target="_blank" rel="noopener">View on Shopify ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Related products ================= -->
+  @if (relatedProducts.length) {
+    <section class="mt-5 pt-4 border-top">
+      <h2 class="h4 fw-bold mb-4">You may also like</h2>
+      <div class="row g-3 g-md-4">
+        @for (related of relatedProducts; track related.id) {
+          <div class="col-6 col-md-3">
+            <app-product-card [product]="related" />
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- Full size image modal (Bootstrap JS) -->
+  <div class="modal fade" id="imageModal" tabindex="-1" aria-label="Product image" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+      <div class="modal-content bg-transparent border-0">
+        <div class="text-end mb-2">
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        @if (activeImage) {
+          <div class="position-relative">
+            <img class="img-fluid rounded-4 w-100" [src]="activeImage.url" [alt]="activeImage.altText ?? product.title">
+            @if (images.length > 1) {
+              <button type="button" class="nav-arrow prev" (click)="previousImage()" aria-label="Previous image">‹</button>
+              <button type="button" class="nav-arrow next" (click)="nextImage()" aria-label="Next image">›</button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="text-center py-5">
+    <p class="display-4">🤷</p>
+    <h1 class="h4">Product not found</h1>
+    <a routerLink="/products" class="btn btn-primary mt-2">Back to products</a>
+  </div>
+}

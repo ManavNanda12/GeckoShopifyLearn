@@ -1,0 +1,29 @@
+.page-header {
+  background:
+    radial-gradient(circle at 85% 20%, rgba(255, 255, 255, 0.18) 0, transparent 40%),
+    linear-gradient(135deg, #14532d, #16a34a 60%, #0ea5e9);
+}
+
+.chip {
+  border: 1px solid var(--bs-border-color);
+  background-color: #fff;
+}
+
+.chip.active {
+  background-color: var(--bs-dark);
+  border-color: var(--bs-dark);
+  color: #fff;
+}
+
+/* Loading placeholder shaped like a product card */
+.skeleton {
+  aspect-ratio: 3 / 4;
+  background: linear-gradient(90deg, #f0f1f3 25%, #e4e6e9 50%, #f0f1f3 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}

@@ -1,0 +1,101 @@
+@switch (state) {
+  @case ('loading') {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Checking your order...</span>
+      </div>
+    </div>
+  }
+
+  @case ('error') {
+    <div class="alert alert-danger">
+      Could not check your order status. Please try again.
+    </div>
+  }
+
+  @case ('none') {
+    <div class="text-center py-5">
+      <h1 class="h3">No recent order</h1>
+      <p class="text-muted">You haven't placed an order yet.</p>
+      <a class="btn btn-primary" routerLink="/products">Start Shopping</a>
+    </div>
+  }
+
+  @default {
+    <!-- completed or pending: both show the order summary -->
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-8">
+
+        @if (state === 'completed') {
+          <div class="text-center mb-4">
+            <div class="success-icon mx-auto mb-3">✓</div>
+            <h1 class="h3">Thank you for your order!</h1>
+            <p class="text-muted mb-0">Your order has been placed. You'll receive a confirmation email from Shopify shortly.</p>
+            @if (orderedAt) {
+              <p class="small text-muted mt-1 mb-0">Placed on {{ orderedAt | date: 'medium' }}</p>
+            }
+          </div>
+        } @else {
+          <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <span>Your checkout isn't complete yet. Your items are still in the cart.</span>
+            <a class="btn btn-warning btn-sm" routerLink="/cart">Go to Cart</a>
+          </div>
+        }
+
+        <!-- Order summary -->
+        <div class="card shadow-sm">
+          <div class="card-header bg-white fw-semibold">
+            {{ state === 'completed' ? 'Order Summary' : 'Cart Summary' }}
+            <span class="text-muted fw-normal">({{ cart?.totalQuantity }} items)</span>
+          </div>
+
+          <ul class="list-group list-group-flush">
+            @for (line of lines; track line.id) {
+              <li class="list-group-item">
+                <div class="row align-items-center g-3">
+                  <div class="col-3 col-sm-2">
+                    @if (line.merchandise.image) {
+                      <img class="img-fluid rounded" [src]="line.merchandise.image.url"
+                        [alt]="line.merchandise.image.altText ?? line.merchandise.product.title">
+                    } @else {
+                      <div class="no-image rounded d-flex align-items-center justify-content-center text-muted small">
+                        No image
+                      </div>
+                    }
+                  </div>
+                  <div class="col-6 col-sm-7">
+                    <a class="fw-semibold text-decoration-none" [routerLink]="['/products', line.merchandise.product.handle]">
+                      {{ line.merchandise.product.title }}
+                    </a>
+                    @if (line.merchandise.title !== 'Default Title') {
+                      <div class="small text-muted">{{ line.merchandise.title }}</div>
+                    }
+                    <div class="small text-muted">Qty: {{ line.quantity }}</div>
+                  </div>
+                  <div class="col-3 text-end fw-semibold">
+                    {{ toNumber(line.cost.totalAmount.amount) | currency: line.cost.totalAmount.currencyCode }}
+                  </div>
+                </div>
+              </li>
+            }
+          </ul>
+
+          @if (cart) {
+            <div class="card-footer bg-white d-flex justify-content-between fw-bold">
+              <span>Total</span>
+              <span>{{ toNumber(cart.cost.totalAmount.amount) | currency: cart.cost.totalAmount.currencyCode }}</span>
+            </div>
+          }
+        </div>
+
+        <p class="small text-muted mt-2">
+          Total shown is the cart total; shipping and taxes are added at checkout.
+        </p>
+
+        <div class="text-center mt-4">
+          <a class="btn btn-primary" routerLink="/products">Continue Shopping</a>
+        </div>
+      </div>
+    </div>
+  }
+}

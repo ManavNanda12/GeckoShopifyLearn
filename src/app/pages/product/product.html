@@ -1,0 +1,87 @@
+<!-- Page header -->
+<div class="page-header rounded-4 p-4 p-md-5 mb-4 text-white">
+  <h1 class="display-6 fw-bold mb-1">Shop All</h1>
+  <p class="mb-0 opacity-75">Boards, wax and gear for your next day on the mountain.</p>
+</div>
+
+@if (isLoading) {
+  <!-- Skeleton cards while loading -->
+  <div class="row g-4">
+    @for (item of [1, 2, 3, 4, 5, 6, 7, 8]; track item) {
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="skeleton rounded-4"></div>
+      </div>
+    }
+  </div>
+} @else if (errorMessage) {
+  <div class="alert alert-danger">{{ errorMessage }}</div>
+} @else {
+  <!-- Toolbar: search + sort -->
+  <div class="row g-2 align-items-center mb-3">
+    <div class="col-12 col-md-6 col-lg-5">
+      <div class="input-group">
+        <span class="input-group-text bg-white">🔍</span>
+        <input type="search" class="form-control" placeholder="Search products, brands, tags..."
+          [value]="searchText" (input)="onSearch($event)" aria-label="Search products">
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-7 d-flex justify-content-md-end align-items-center gap-2">
+      <label class="text-muted small text-nowrap" for="sortBy">Sort by</label>
+      <select id="sortBy" class="form-select w-auto" [value]="sortBy" (change)="onSortChange($event)">
+        <option value="featured">Featured</option>
+        <option value="priceLow">Price: Low to High</option>
+        <option value="priceHigh">Price: High to Low</option>
+        <option value="nameAZ">Name: A to Z</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Category chips + stock filter -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div class="d-flex flex-wrap gap-2">
+      <button type="button" class="btn btn-sm rounded-pill chip"
+        [class.active]="selectedCategory === ''" (click)="setCategory('')">All</button>
+      @for (category of categories; track category) {
+        <button type="button" class="btn btn-sm rounded-pill chip text-capitalize"
+          [class.active]="selectedCategory === category" (click)="setCategory(category)">
+          {{ category }}
+        </button>
+      }
+    </div>
+
+    <div class="btn-group btn-group-sm" role="group" aria-label="Filter by stock">
+      <button type="button" class="btn"
+        [class.btn-dark]="selectedFilter === 'all'" [class.btn-outline-dark]="selectedFilter !== 'all'"
+        (click)="setFilter('all')">All ({{ shopifyProducts.length }})</button>
+      <button type="button" class="btn"
+        [class.btn-dark]="selectedFilter === 'inStock'" [class.btn-outline-dark]="selectedFilter !== 'inStock'"
+        (click)="setFilter('inStock')">In stock ({{ inStockCount }})</button>
+      <button type="button" class="btn"
+        [class.btn-dark]="selectedFilter === 'soldOut'" [class.btn-outline-dark]="selectedFilter !== 'soldOut'"
+        (click)="setFilter('soldOut')">Sold out ({{ soldOutCount }})</button>
+    </div>
+  </div>
+
+  <!-- Result count -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <small class="text-muted">Showing {{ filteredProducts.length }} of {{ shopifyProducts.length }} products</small>
+    @if (hasActiveFilters) {
+      <button type="button" class="btn btn-link btn-sm p-0" (click)="clearFilters()">Clear filters</button>
+    }
+  </div>
+
+  <!-- 2 cards per row on phones, 3 on medium, 4 on large screens -->
+  <div class="row g-3 g-md-4">
+    @for (product of filteredProducts; track product.id) {
+      <div class="col-6 col-md-4 col-lg-3">
+        <app-product-card [product]="product" />
+      </div>
+    } @empty {
+      <div class="col-12 text-center py-5">
+        <p class="fs-1 mb-2">🔎</p>
+        <h2 class="h5">No products match your filters</h2>
+        <button type="button" class="btn btn-outline-primary mt-2" (click)="clearFilters()">Clear filters</button>
+      </div>
+    }
+  </div>
+}

@@ -1,0 +1,14 @@
+.success-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: var(--bs-success);
+  color: #fff;
+  font-size: 2rem;
+  line-height: 64px;
+}
+
+.no-image {
+  aspect-ratio: 1;
+  background-color: var(--bs-light);
+}

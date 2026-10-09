@@ -1,0 +1,66 @@
+@let image = images[0];
+@let price = product.priceRange.minVariantPrice;
+@let compareAt = product.compareAtPriceRange.maxVariantPrice;
+
+<div class="card product-card h-100 border-0 shadow-sm" [class.sold-out]="soldOut">
+  <!-- Image area: hover shows the second image -->
+  <div class="image-wrap position-relative">
+    @if (image) {
+      <img class="main-img" [src]="image.thumbUrl" [alt]="image.altText ?? product.title" loading="lazy">
+      @if (hoverImage) {
+        <img class="hover-img" [src]="hoverImage.thumbUrl" [alt]="hoverImage.altText ?? product.title" loading="lazy">
+      }
+    } @else {
+      <div class="no-image d-flex flex-column align-items-center justify-content-center text-muted">
+        <span class="fs-1">🏂</span>
+        <small>No image yet</small>
+      </div>
+    }
+
+    <!-- Badges -->
+    <div class="badges position-absolute top-0 start-0 m-2 d-flex flex-column gap-1">
+      @if (soldOut) {
+        <span class="badge text-bg-dark">Sold out</span>
+      } @else if (discount > 0) {
+        <span class="badge text-bg-danger">-{{ discount }}%</span>
+      }
+    </div>
+
+    @if (images.length > 1) {
+      <span class="image-count badge text-bg-light position-absolute bottom-0 end-0 m-2">
+        📷 {{ images.length }}
+      </span>
+    }
+  </div>
+
+  <div class="card-body d-flex flex-column">
+    @if (product.vendor) {
+      <small class="vendor text-uppercase text-muted">{{ product.vendor }}</small>
+    }
+
+    <h3 class="h6 card-title mt-1 mb-2">
+      <!-- stretched-link makes the whole card clickable -->
+      <a class="stretched-link text-reset text-decoration-none" [routerLink]="['/products', product.handle]">
+        {{ product.title }}
+      </a>
+    </h3>
+
+    @if (optionSummary) {
+      <small class="text-muted mb-2">{{ optionSummary }} available</small>
+    }
+
+    <div class="mt-auto d-flex align-items-baseline gap-2 flex-wrap">
+      @if (hasPriceRange) {
+        <small class="text-muted">From</small>
+      }
+      <span class="fw-bold fs-5" [class.text-danger]="discount > 0">
+        {{ toNumber(price.amount) | currency: price.currencyCode }}
+      </span>
+      @if (discount > 0) {
+        <small class="text-muted text-decoration-line-through">
+          {{ toNumber(compareAt.amount) | currency: compareAt.currencyCode }}
+        </small>
+      }
+    </div>
+  </div>
+</div>
