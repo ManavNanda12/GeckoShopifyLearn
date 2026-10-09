@@ -1,0 +1,42 @@
+.account-header {
+  background:
+    radial-gradient(circle at 90% 10%, rgba(255, 255, 255, 0.18) 0, transparent 40%),
+    linear-gradient(135deg, #14532d, #16a34a 60%, #0ea5e9);
+}
+
+.avatar {
+  width: 56px;
+  height: 56px;
+  font-size: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+}
+
+.stat {
+  background-color: var(--bs-tertiary-bg);
+}
+
+dt {
+  font-weight: 600;
+  color: var(--bs-secondary-color);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+dd {
+  margin-bottom: 0.75rem;
+}
+
+/* Overlapping product photos */
+.order-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border: 2px solid var(--bs-body-bg);
+  margin-left: -10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.order-thumb:first-child {
+  margin-left: 0;
+}

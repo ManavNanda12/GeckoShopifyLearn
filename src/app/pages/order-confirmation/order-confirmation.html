@@ -44,7 +44,7 @@
 
         <!-- Order summary -->
         <div class="card shadow-sm">
-          <div class="card-header bg-white fw-semibold">
+          <div class="card-header bg-body fw-semibold">
             {{ state === 'completed' ? 'Order Summary' : 'Cart Summary' }}
             <span class="text-muted fw-normal">({{ cart?.totalQuantity }} items)</span>
           </div>
@@ -81,7 +81,7 @@
           </ul>
 
           @if (cart) {
-            <div class="card-footer bg-white d-flex justify-content-between fw-bold">
+            <div class="card-footer bg-body d-flex justify-content-between fw-bold">
               <span>Total</span>
               <span>{{ toNumber(cart.cost.totalAmount.amount) | currency: cart.cost.totalAmount.currencyCode }}</span>
             </div>
@@ -92,8 +92,13 @@
           Total shown is the cart total; shipping and taxes are added at checkout.
         </p>
 
-        <div class="text-center mt-4">
+        <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
           <a class="btn btn-primary" routerLink="/products">Continue Shopping</a>
+          @if (isLoggedIn) {
+            <a class="btn btn-outline-success" routerLink="/account">View my orders</a>
+          } @else if (state === 'completed') {
+            <a class="btn btn-outline-success" routerLink="/account/register">Create an account to track orders</a>
+          }
         </div>
       </div>
     </div>

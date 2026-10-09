@@ -1,0 +1,47 @@
+.no-image {
+  aspect-ratio: 1;
+  background-color: var(--bs-tertiary-bg);
+  font-size: 1.5rem;
+}
+
+/* ---------- Progress tracker ---------- */
+.tracker {
+  align-items: flex-start;
+  max-width: 480px;
+}
+
+.step {
+  width: 70px;
+  color: var(--bs-secondary-color);
+}
+
+.step-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--bs-border-color);
+  background-color: var(--bs-body-bg);
+  line-height: 24px;
+  font-size: 0.8rem;
+  color: #fff;
+}
+
+.step.done {
+  color: var(--bs-success);
+  font-weight: 600;
+}
+
+.step.done .step-dot {
+  background-color: var(--bs-success);
+  border-color: var(--bs-success);
+}
+
+.step-line {
+  height: 2px;
+  margin-top: 13px;
+  background-color: var(--bs-border-color);
+}
+
+.step-line.done {
+  background-color: var(--bs-success);
+}

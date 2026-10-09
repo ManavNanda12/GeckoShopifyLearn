@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Cart, LastOrder, ShopifyCart, ShopifyCartLine } from '../../services/cart';
+import { Customer } from '../../services/customer';
 
 // completed = checkout done, pending = cart still open, none = nothing to show
 type OrderState = 'loading' | 'completed' | 'pending' | 'none' | 'error';
@@ -19,8 +20,13 @@ export class OrderConfirmationComponent implements OnInit {
 
   constructor(
     private cartService: Cart,
+    private customerService: Customer,
     private cdr: ChangeDetectorRef
   ) {}
+
+  get isLoggedIn(): boolean {
+    return this.customerService.isLoggedIn;
+  }
 
   ngOnInit(): void {
     // refreshCart() moves a checked-out cart to "last order" and clears it

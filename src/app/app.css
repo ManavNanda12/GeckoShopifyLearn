@@ -59,7 +59,31 @@ main {
   transition: transform 0.2s ease;
 }
 
+/* ---------- Navbar ---------- */
+/* Deep green-black so the navbar stands out from the page in both themes */
+.site-nav {
+  background-color: #0a100d;
+  border-bottom: 1px solid rgba(74, 222, 128, 0.15);
+}
+
+.theme-toggle {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  line-height: 1;
+}
+
+.theme-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
 /* ---------- Footer ---------- */
+.site-footer {
+  background-color: #0a100d;
+  border-top: 1px solid rgba(74, 222, 128, 0.15);
+}
+
 .site-footer a {
   color: rgba(255, 255, 255, 0.6);
   text-decoration: none;

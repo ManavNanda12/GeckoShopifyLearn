@@ -17,7 +17,7 @@
 /* Square image area */
 .image-wrap {
   aspect-ratio: 1;
-  background-color: #f6f7f9;
+  background-color: var(--bs-tertiary-bg);
   overflow: hidden;
 }
 
@@ -45,7 +45,7 @@
 
 .no-image {
   height: 100%;
-  background: linear-gradient(135deg, #eef7f0, #f6f7f9);
+  background: linear-gradient(135deg, var(--bs-success-bg-subtle), var(--bs-tertiary-bg));
 }
 
 .badges,

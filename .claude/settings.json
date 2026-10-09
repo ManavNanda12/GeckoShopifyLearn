@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(sed -i 's/background-color: #f6f7f9;/background-color: var\\(--bs-tertiary-bg\\);/' components/product-card/product-card.css pages/product-detail/product-detail.css pages/home/home.css pages/account/account/account.css pages/account/order-detail/order-detail.css)",
+      "Bash(sed -i 's/linear-gradient\\(135deg, #eef7f0, #f6f7f9\\)/linear-gradient\\(135deg, var\\(--bs-success-bg-subtle\\), var\\(--bs-tertiary-bg\\)\\)/' components/product-card/product-card.css pages/product-detail/product-detail.css)",
+      "Bash(sed -i 's/linear-gradient\\(90deg, #f0f1f3 25%, #e4e6e9 50%, #f0f1f3 75%\\)/linear-gradient\\(90deg, var\\(--bs-secondary-bg\\) 25%, var\\(--bs-tertiary-bg\\) 50%, var\\(--bs-secondary-bg\\) 75%\\)/' pages/product-detail/product-detail.css pages/product/product.css)",
+      "Bash(sed -i 's/background-color: var\\(--bs-light\\);/background-color: var\\(--bs-tertiary-bg\\);/' pages/cart/cart.css pages/order-confirmation/order-confirmation.css)",
+      "Bash(sed -i 's/background-color: #fff5f5;/background-color: var\\(--bs-danger-bg-subtle\\);/' pages/home/home.css)"
     ]
   }
 }

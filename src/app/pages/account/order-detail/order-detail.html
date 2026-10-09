@@ -1,0 +1,144 @@
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a routerLink="/account">My account</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Order {{ order?.name ?? '' }}</li>
+  </ol>
+</nav>
+
+@if (isLoading) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-success" role="status">
+      <span class="visually-hidden">Loading order...</span>
+    </div>
+  </div>
+} @else if (errorMessage) {
+  <div class="alert alert-danger">{{ errorMessage }}</div>
+} @else if (order) {
+  <!-- Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="h3 fw-bold mb-1">Order {{ order.name }}</h1>
+      <p class="text-muted mb-2">Placed on {{ order.processedAt | date: 'medium' }}</p>
+      <span class="badge {{ statusBadgeClass(order.financialStatus) }} me-1">{{ formatStatus(order.financialStatus) }}</span>
+      <span class="badge {{ statusBadgeClass(order.fulfillmentStatus) }}">{{ formatStatus(order.fulfillmentStatus) }}</span>
+    </div>
+    <a class="btn btn-outline-success" [href]="order.statusUrl" target="_blank" rel="noopener">
+      Track on Shopify ↗
+    </a>
+  </div>
+
+  <!-- Progress tracker -->
+  <div class="tracker d-flex mb-4">
+    @for (step of steps; track step.label; let last = $last) {
+      <div class="step text-center" [class.done]="step.done">
+        <div class="step-dot mx-auto mb-1">{{ step.done ? '✓' : '' }}</div>
+        <small>{{ step.label }}</small>
+      </div>
+      @if (!last) {
+        <div class="step-line flex-grow-1" [class.done]="step.done"></div>
+      }
+    }
+  </div>
+
+  <div class="row g-4">
+    <!-- Items -->
+    <div class="col-12 col-lg-8">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-body fw-semibold py-3">
+          Items <span class="text-muted fw-normal">({{ orderItemCount(order) }})</span>
+        </div>
+        <ul class="list-group list-group-flush">
+          @for (line of lines; track $index) {
+            <li class="list-group-item py-3">
+              <div class="row align-items-center g-3">
+                <div class="col-3 col-sm-2">
+                  @if (line.variant?.image) {
+                    <img class="img-fluid rounded-3" [src]="line.variant!.image!.url"
+                      [alt]="line.variant!.image!.altText ?? line.title">
+                  } @else {
+                    <div class="no-image rounded-3 d-flex align-items-center justify-content-center">🏂</div>
+                  }
+                </div>
+                <div class="col-6 col-sm-7">
+                  @if (line.variant) {
+                    <a class="fw-semibold text-decoration-none" [routerLink]="['/products', line.variant.product.handle]">
+                      {{ line.title }}
+                    </a>
+                    @if (line.variant.title !== 'Default Title') {
+                      <div class="small text-muted">{{ line.variant.title }}</div>
+                    }
+                  } @else {
+                    <span class="fw-semibold">{{ line.title }}</span>
+                    <div class="small text-muted">No longer available</div>
+                  }
+                  <div class="small text-muted">Qty: {{ line.quantity }}</div>
+                </div>
+                <div class="col-3 text-end fw-semibold">
+                  {{ toNumber(line.originalTotalPrice.amount) | currency: line.originalTotalPrice.currencyCode }}
+                </div>
+              </div>
+            </li>
+          }
+        </ul>
+      </div>
+    </div>
+
+    <!-- Summary + address -->
+    <div class="col-12 col-lg-4">
+      <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body">
+          <h2 class="h6 text-uppercase text-muted mb-3">Summary</h2>
+          @if (order.subtotalPrice) {
+            <div class="d-flex justify-content-between mb-2">
+              <span>Subtotal</span>
+              <span>{{ toNumber(order.subtotalPrice.amount) | currency: order.subtotalPrice.currencyCode }}</span>
+            </div>
+          }
+          <div class="d-flex justify-content-between mb-2">
+            <span>Shipping</span>
+            <span>
+              @if (toNumber(order.totalShippingPrice.amount) === 0) {
+                Free
+              } @else {
+                {{ toNumber(order.totalShippingPrice.amount) | currency: order.totalShippingPrice.currencyCode }}
+              }
+            </span>
+          </div>
+          @if (order.totalTax) {
+            <div class="d-flex justify-content-between mb-2">
+              <span>Tax</span>
+              <span>{{ toNumber(order.totalTax.amount) | currency: order.totalTax.currencyCode }}</span>
+            </div>
+          }
+          <hr>
+          <div class="d-flex justify-content-between fw-bold fs-5">
+            <span>Total</span>
+            <span>{{ toNumber(order.currentTotalPrice.amount) | currency: order.currentTotalPrice.currencyCode }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body">
+          <h2 class="h6 text-uppercase text-muted mb-3">Shipping address</h2>
+          @if (order.shippingAddress) {
+            <address class="small mb-0">
+              @for (addressLine of order.shippingAddress.formatted; track $index) {
+                {{ addressLine }}<br>
+              }
+            </address>
+          } @else {
+            <p class="small text-muted mb-0">No shipping address (digital item).</p>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="text-center py-5">
+    <p class="display-4">🔍</p>
+    <h1 class="h4">Order not found</h1>
+    <p class="text-muted">This order doesn't exist or doesn't belong to your account.</p>
+    <a routerLink="/account" class="btn btn-success">Back to my account</a>
+  </div>
+}

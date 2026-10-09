@@ -46,7 +46,7 @@
                     <button class="btn btn-outline-secondary" type="button" (click)="decrease(line)"
                       [disabled]="busyLineId === line.id"
                       [attr.aria-label]="line.quantity === 1 ? 'Remove item' : 'Decrease quantity'">−</button>
-                    <span class="input-group-text bg-white justify-content-center flex-grow-1">
+                    <span class="input-group-text bg-body justify-content-center flex-grow-1">
                       @if (busyLineId === line.id) {
                         <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
                       } @else {

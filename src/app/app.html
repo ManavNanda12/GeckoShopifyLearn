@@ -1,15 +1,24 @@
 <!-- Navbar: sticks to the top, collapses into a hamburger menu on small screens -->
-<nav class="navbar navbar-expand-md navbar-dark bg-dark sticky-top shadow-sm">
+<!-- data-bs-theme="dark" keeps the navbar dark in both light and dark mode -->
+<nav class="navbar navbar-expand-md site-nav sticky-top shadow-sm" data-bs-theme="dark">
   <div class="container">
     <a class="navbar-brand brand d-flex align-items-center gap-2" routerLink="/home">
       <span class="brand-mark" aria-hidden="true"></span>
       <span class="brand-name">Gecko <span class="brand-accent">Store</span></span>
     </a>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
-      aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+    <!-- Theme toggle + hamburger: always visible, on the far right on desktop -->
+    <div class="d-flex align-items-center gap-2 ms-auto order-md-last ms-md-3">
+      <button type="button" class="btn btn-sm theme-toggle rounded-circle" (click)="toggleTheme()"
+        [attr.aria-label]="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+        [title]="isDark ? 'Switch to light mode' : 'Switch to dark mode'">
+        {{ isDark ? '☀️' : '🌙' }}
+      </button>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+        aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
 
     <div class="collapse navbar-collapse" id="mainNav">
       <ul class="navbar-nav ms-auto align-items-md-center gap-md-2">
@@ -29,6 +38,15 @@
             }
           </a>
         </li>
+        <li class="nav-item">
+          @let customer = customer$ | async;
+          @if (customer) {
+            <a class="nav-link" routerLink="/account" routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: false }">👤 {{ customer.firstName || 'Account' }}</a>
+          } @else {
+            <a class="btn btn-sm btn-success ms-md-2 my-2 my-md-0" routerLink="/account/login">Sign in</a>
+          }
+        </li>
       </ul>
     </div>
   </div>
@@ -39,7 +57,7 @@
   <router-outlet />
 </main>
 
-<footer class="site-footer bg-dark text-white-50 pt-5 pb-3 mt-5">
+<footer class="site-footer text-white-50 pt-5 pb-3 mt-5" data-bs-theme="dark">
   <div class="container">
     <div class="row g-4">
       <div class="col-12 col-md-5">
@@ -61,6 +79,7 @@
         <h3 class="h6 text-white">Help</h3>
         <ul class="list-unstyled small mb-0">
           <li><a routerLink="/cart">Your cart</a></li>
+          <li><a routerLink="/account">My account &amp; orders</a></li>
           <li><a routerLink="/order-confirmation">Order status</a></li>
           <li>Free shipping over $100</li>
         </ul>

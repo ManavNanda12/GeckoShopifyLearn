@@ -20,9 +20,14 @@ A **learning project** for building a custom storefront on top of Shopify. The A
 | **Product detail** | Image gallery (hover zoom, thumbnails, full-size modal), variant options with photo swatches, sale price and % off, stock status, details accordion, Shopify recommendations |
 | **Cart** | Change quantities, remove items, subtotal and total, checkout via Shopify |
 | **Order confirmation** | Detects a completed checkout and shows the order summary |
+| **Sign in / Register** | Customer accounts with email + password, plus a "forgot password" email |
+| **My account** | Profile, default address, order count, total spent, order history |
+| **Order detail** | Placed → Paid → Shipped tracker, items, totals, shipping address, link to Shopify's order status page |
 
 Also included:
-- 🛒 A live cart badge in the navbar, shared across all pages
+- 🌙 Dark mode (the default) with a ☀️ / 🌙 toggle, remembered between visits
+- 🛒 A live cart badge and signed-in customer name in the navbar, shared across all pages
+- 🔐 Route guards: account pages need sign-in, and login/register redirect signed-in users
 - 📱 A responsive layout using the Bootstrap `row` / `col` grid
 - ⚡ Lazy-loaded routes (`loadComponent`)
 - 🎨 A logo made entirely in CSS (no image files)
@@ -32,8 +37,9 @@ Also included:
 ## 🧱 Tech stack
 
 - **Angular 22**: standalone components, zoneless change detection, built-in control flow (`@if`, `@for`, `@switch`)
-- **RxJS**: `BehaviorSubject` to share cart state, `async` pipe in templates
-- **Bootstrap 5**: layout and UI components (navbar, accordion, modal)
+- **RxJS**: `BehaviorSubject` to share cart and customer state, `async` pipe in templates
+- **Template-driven forms**: `ngModel` with built-in validators for login and register
+- **Bootstrap 5.3**: layout, UI components (navbar, accordion, modal) and color modes (`data-bs-theme`) for dark mode
 - **Shopify Storefront API** (`2026-10`): GraphQL over `HttpClient`
 - **Vitest**: unit tests
 
@@ -68,11 +74,27 @@ Also included:
 - `addToCart(variantId, qty)`: creates a cart on the first add (`cartCreate`), then adds to it (`cartLinesAdd`). If the saved cart has expired, it starts a new one.
 - `updateQuantity()` / `removeLine()`: `cartLinesUpdate` / `cartLinesRemove`
 - `refreshCart()`: reloads the saved cart when the app starts
+- `linkCartToCustomer()`: attaches the cart to the signed-in customer (`cartBuyerIdentityUpdate`)
 - The cart ID is kept in `localStorage`, so the cart survives page reloads
 
-### Detecting a completed order
+**`services/customer.ts`**: customer accounts, using the Storefront API's classic customer mutations
+- `customer$`: the signed-in customer, shared by the navbar and account pages
+- `login()`: `customerAccessTokenCreate`; the access token and its expiry are saved in `localStorage`
+- `register()`: `customerCreate`, then signs in automatically
+- `recoverPassword()`: `customerRecover`; Shopify emails a reset link
+- `logout()`: `customerAccessTokenDelete`, then clears the session and the cart
+- `getOrders()` / `getOrder()`: `customer.orders`, newest first
+- `restoreSession()`: signs the customer back in on app start if their token hasn't expired
 
-The Storefront API **can't read orders without a customer login**, so the app infers it:
+**`services/theme.ts`**: switches `data-bs-theme` between `dark` and `light` on `<html>` and saves the choice. A small inline script in `index.html` applies the saved theme before Angular starts, so the page doesn't flash white.
+
+### Linking orders to customers
+
+When a customer signs in, their existing cart is attached to them, and any new cart is created with their login token (`buyerIdentity.customerAccessToken`). Shopify's checkout then fills in their email and address, and the finished order appears under `customer.orders` on the **My account** page.
+
+### Detecting a completed order (guests)
+
+For guest checkouts there's no customer login, so the app can't read the order. Instead, it infers that checkout finished:
 1. Each cart change saves a copy of the cart in `localStorage`.
 2. After checkout, Shopify no longer returns that cart (`cart(id)` → `null`).
 3. The app then treats the saved copy as the "last order" and shows it on `/order-confirmation`.
@@ -83,25 +105,37 @@ The Storefront API **can't read orders without a customer login**, so the app in
 
 ```
 src/
+├── index.html                  # Applies the saved theme before Angular loads
+├── styles.css                  # Dark theme palette (Bootstrap CSS variables)
 ├── environments/
 │   └── environment.ts          # Shopify store domain + Storefront token
 └── app/
-    ├── app.ts / app.html       # Navbar (CSS logo, cart badge), footer
-    ├── app.routes.ts           # Lazy-loaded routes
+    ├── app.ts / app.html       # Navbar (CSS logo, cart badge, account, theme toggle), footer
+    ├── app.routes.ts           # Lazy-loaded routes + guards
     ├── app.config.ts           # Router, HttpClient, scroll-to-top
     ├── components/
     │   └── product-card/       # Reusable product card (@Input product)
+    ├── guards/
+    │   └── auth.guard.ts       # authGuard (signed in only), guestGuard (signed out only)
     ├── pages/
     │   ├── home/
     │   ├── product/            # Product listing
     │   ├── product-detail/
     │   ├── cart/
-    │   └── order-confirmation/
+    │   ├── order-confirmation/
+    │   └── account/
+    │       ├── login/          # Sign in + forgot password
+    │       ├── register/
+    │       ├── account/        # Profile + order history
+    │       └── order-detail/
     ├── services/
     │   ├── shopify.ts          # Product queries
-    │   └── cart.ts             # Cart state + mutations
+    │   ├── cart.ts             # Cart state + mutations
+    │   ├── customer.ts         # Customer auth + orders
+    │   └── theme.ts            # Light / dark mode
     └── utils/
-        └── product-utils.ts    # isSoldOut, getAllImages, discountPercent, ...
+        ├── product-utils.ts    # isSoldOut, getAllImages, discountPercent, ...
+        └── order-utils.ts      # formatStatus, statusBadgeClass, ...
 ```
 
 ### Routes
@@ -113,6 +147,10 @@ src/
 | `/products/:handle` | Product detail |
 | `/cart` | Cart |
 | `/order-confirmation` | Order confirmation |
+| `/account/login` | Sign in / forgot password (signed-out visitors only) |
+| `/account/register` | Create account (signed-out visitors only) |
+| `/account` | Profile + order history (signed in only) |
+| `/account/orders/:orderNumber` | Order detail (signed in only) |
 
 ---
 
@@ -128,7 +166,9 @@ src/
    - `unauthenticated_read_product_listings`
    - `unauthenticated_read_product_tags`
    - `unauthenticated_write_checkouts` / `unauthenticated_read_checkouts` (needed for the cart)
+   - `unauthenticated_read_customers` / `unauthenticated_write_customers` (needed for accounts and order history)
 3. Install the app and copy the **Storefront API access token**.
+4. Under **Settings → Customer accounts**, use **legacy (classic) customer accounts**. With the newer customer accounts, customers have no passwords, so email + password sign-in won't work.
 
 ### 3. Configure the app
 Edit `src/environments/environment.ts`:
@@ -214,14 +254,19 @@ This doesn't affect checkout or the password page, which don't use `theme.liquid
 - **Product data model:** products → variants → `selectedOptions`, `compareAtPrice` for sales, `availableForSale` for stock
 - **Zoneless Angular:** plain properties set inside `subscribe()` need `ChangeDetectorRef.markForCheck()`, while the `async` pipe handles this automatically
 - **Sharing state with RxJS:** a `BehaviorSubject` in a service keeps the navbar badge, cart page and product page in sync
+- **Customer auth with the Storefront API:** access tokens with expiry, `customerUserErrors`, and linking a cart to a customer with `buyerIdentity` so orders appear in their history
+- **Route guards:** functional `CanActivateFn` guards that redirect to login with a `returnUrl`
+- **Theming:** Bootstrap 5.3 color modes, overriding CSS variables, and using `var(--bs-tertiary-bg)` instead of hard-coded colors so every component follows the theme
 - **Shopify store setup:** Storefront API scopes, password-protected dev stores, test payment gateways, theme redirects
 
 ---
 
 ## ⚠️ Known limitations
 
-- **No order number or order history.** These need customer accounts (the Customer Account API).
-- **Expired carts look like completed orders.** Shopify returns `null` for both, and carts expire after about 10 days.
+- **Classic customer accounts only.** This app uses the Storefront API's customer mutations. Shopify's newer **Customer Account API** (OAuth with passwordless login) needs an HTTPS callback URL, such as through ngrok, and isn't covered here.
+- **No profile or address editing yet.** That would use `customerUpdate` / `customerAddressCreate`.
+- **No automatic token renewal.** The customer token lasts about 30 days, and then the customer signs in again.
+- **Guest order confirmation is a best guess.** For guest checkouts, expired carts look like completed orders: Shopify returns `null` for both, and carts expire after about 10 days.
 - **No "only N left" stock counts.** That needs the `unauthenticated_read_product_inventory` scope.
 - **Placeholder text.** Shipping and return wording on product pages is example text.
 - **The theme redirect points to `localhost`.** It only works on your own machine until you deploy and update `appUrl`.

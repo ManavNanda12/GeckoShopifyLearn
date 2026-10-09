@@ -1,0 +1,76 @@
+<div class="row justify-content-center py-md-4">
+  <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+    <div class="card auth-card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4 p-md-5">
+        <h1 class="h3 fw-bold mb-1">Create your account</h1>
+        <p class="text-muted mb-4">Track orders and check out faster next time.</p>
+
+        @if (errorMessage) {
+          <div class="alert alert-danger small">{{ errorMessage }}</div>
+        }
+
+        <form #registerForm="ngForm" (ngSubmit)="onRegister(registerForm)" novalidate>
+          <!-- Name: side by side on small screens and up -->
+          <div class="row g-3 mb-3">
+            <div class="col-12 col-sm-6">
+              <label class="form-label" for="firstName">First name</label>
+              <input id="firstName" name="firstName" class="form-control"
+                [(ngModel)]="firstName" #firstNameField="ngModel" required autocomplete="given-name"
+                [class.is-invalid]="firstNameField.invalid && firstNameField.touched">
+              <div class="invalid-feedback">First name is required.</div>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="form-label" for="lastName">Last name</label>
+              <input id="lastName" name="lastName" class="form-control"
+                [(ngModel)]="lastName" #lastNameField="ngModel" required autocomplete="family-name"
+                [class.is-invalid]="lastNameField.invalid && lastNameField.touched">
+              <div class="invalid-feedback">Last name is required.</div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="email">Email</label>
+            <input id="email" name="email" type="email" class="form-control"
+              [(ngModel)]="email" #emailField="ngModel" required email autocomplete="email"
+              [class.is-invalid]="emailField.invalid && emailField.touched">
+            <div class="invalid-feedback">Please enter a valid email.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="password">Password</label>
+            <div class="input-group has-validation">
+              <!-- Shopify requires at least 5 characters -->
+              <input id="password" name="password" class="form-control"
+                [type]="showPassword ? 'text' : 'password'"
+                [(ngModel)]="password" #passwordField="ngModel" required minlength="5" autocomplete="new-password"
+                [class.is-invalid]="passwordField.invalid && passwordField.touched">
+              <button class="btn btn-outline-secondary" type="button" (click)="showPassword = !showPassword"
+                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
+                {{ showPassword ? '🙈' : '👁️' }}
+              </button>
+              <div class="invalid-feedback">Password must be at least 5 characters.</div>
+            </div>
+          </div>
+
+          <div class="form-check mb-4">
+            <input id="acceptsMarketing" name="acceptsMarketing" type="checkbox" class="form-check-input"
+              [(ngModel)]="acceptsMarketing">
+            <label class="form-check-label small" for="acceptsMarketing">Email me about new arrivals and offers</label>
+          </div>
+
+          <button type="submit" class="btn btn-success btn-lg w-100" [disabled]="isSubmitting">
+            @if (isSubmitting) {
+              <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> Creating account...
+            } @else {
+              Create account
+            }
+          </button>
+        </form>
+
+        <p class="text-center text-muted mt-4 mb-0">
+          Already have an account? <a routerLink="/account/login" class="fw-semibold">Sign in</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

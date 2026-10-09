@@ -1,0 +1,4 @@
+/* Shared by the login and register pages */
+.auth-card {
+  border-top: 4px solid var(--bs-success) !important;
+}

@@ -23,7 +23,7 @@
 }
 
 .perk {
-  background-color: #f6f7f9;
+  background-color: var(--bs-tertiary-bg);
 }
 
 .category-tile {
@@ -47,5 +47,5 @@
 }
 
 .sale-section {
-  background-color: #fff5f5;
+  background-color: var(--bs-danger-bg-subtle);
 }

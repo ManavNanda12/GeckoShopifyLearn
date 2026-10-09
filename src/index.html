@@ -1,11 +1,17 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
   <meta charset="utf-8">
-  <title>GeckoShopifyLearn</title>
+  <title>Gecko Store</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <!-- Apply the saved theme before the page renders (prevents a white flash). Dark is the default. -->
+  <script>
+    try {
+      document.documentElement.setAttribute('data-bs-theme', localStorage.getItem('theme') === 'light' ? 'light' : 'dark');
+    } catch (e) { }
+  </script>
 </head>
 <body>
   <app-root></app-root>

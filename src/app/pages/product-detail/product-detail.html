@@ -131,7 +131,7 @@
             <div class="input-group quantity-group">
               <button class="btn btn-outline-secondary" type="button" (click)="decreaseQuantity()"
                 [disabled]="quantity <= 1 || isAddingToCart" aria-label="Decrease quantity">−</button>
-              <span class="input-group-text bg-white justify-content-center flex-grow-1">{{ quantity }}</span>
+              <span class="input-group-text bg-body justify-content-center flex-grow-1">{{ quantity }}</span>
               <button class="btn btn-outline-secondary" type="button" (click)="increaseQuantity()"
                 [disabled]="isAddingToCart" aria-label="Increase quantity">+</button>
             </div>
@@ -247,7 +247,7 @@
         @if (product.tags.length) {
           <div class="d-flex flex-wrap gap-1 mt-3">
             @for (tag of product.tags; track tag) {
-              <span class="badge rounded-pill text-bg-light border">#{{ tag }}</span>
+              <span class="badge rounded-pill bg-body-tertiary text-body border">#{{ tag }}</span>
             }
           </div>
         }

@@ -6,19 +6,19 @@
 
 .chip {
   border: 1px solid var(--bs-border-color);
-  background-color: #fff;
+  background-color: var(--bs-body-bg);
 }
 
 .chip.active {
-  background-color: var(--bs-dark);
-  border-color: var(--bs-dark);
-  color: #fff;
+  background-color: var(--bs-emphasis-color);
+  border-color: var(--bs-emphasis-color);
+  color: var(--bs-body-bg);
 }
 
 /* Loading placeholder shaped like a product card */
 .skeleton {
   aspect-ratio: 3 / 4;
-  background: linear-gradient(90deg, #f0f1f3 25%, #e4e6e9 50%, #f0f1f3 75%);
+  background: linear-gradient(90deg, var(--bs-secondary-bg) 25%, var(--bs-tertiary-bg) 50%, var(--bs-secondary-bg) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.2s infinite;
 }

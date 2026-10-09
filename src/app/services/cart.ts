@@ -111,7 +111,39 @@ export class Cart {
     private cartSubject = new BehaviorSubject<ShopifyCart | null>(null);
     cart$ = this.cartSubject.asObservable();
 
+    // Set by the Customer service when someone logs in, so new carts belong to them
+    private customerAccessToken: string | null = null;
+
     constructor(private http: HttpClient) { }
+
+    // ---------- Customer link ----------
+
+    setCustomerAccessToken(token: string | null): void {
+        this.customerAccessToken = token;
+    }
+
+    // Attach the current cart to the logged in customer.
+    // Checkout then prefills their email/address and the order appears in their order history.
+    linkCartToCustomer(): Observable<ShopifyCart | null> {
+        const cartId = this.getSavedCartId();
+        if (!cartId || !this.customerAccessToken) {
+            return of(null);
+        }
+
+        return this.cartMutation('cartBuyerIdentityUpdate', `
+          mutation CartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
+            cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
+              cart { ${CART_FIELDS} }
+              userErrors { message }
+            }
+          }
+        `, { cartId, buyerIdentity: { customerAccessToken: this.customerAccessToken } });
+    }
+
+    // Forget the current cart (used on logout so the next person starts fresh)
+    resetCart(): void {
+        this.clearSavedCart();
+    }
 
     // ---------- Public cart actions ----------
 
@@ -220,7 +252,15 @@ export class Cart {
               userErrors { message }
             }
           }
-        `, { input: { lines } });
+        `, {
+            input: {
+                lines,
+                // Logged in? Create the cart for that customer right away
+                ...(this.customerAccessToken && {
+                    buyerIdentity: { customerAccessToken: this.customerAccessToken }
+                })
+            }
+        });
     }
 
     // Sends any GraphQL query and returns its "data", throwing on GraphQL errors

@@ -10,5 +10,5 @@
 
 .no-image {
   aspect-ratio: 1;
-  background-color: var(--bs-light);
+  background-color: var(--bs-tertiary-bg);
 }

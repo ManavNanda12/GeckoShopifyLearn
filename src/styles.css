@@ -1,1 +1,37 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global styles */
+
+/* Dark theme: a slightly green-tinted palette to match the Gecko brand.
+   Bootstrap 5.3 reads these variables, so every component follows automatically. */
+[data-bs-theme="dark"] {
+  --bs-body-bg: #0f1412;
+  --bs-body-bg-rgb: 15, 20, 18;
+  --bs-secondary-bg: #222b26;
+  --bs-secondary-bg-rgb: 34, 43, 38;
+  --bs-tertiary-bg: #18201c;
+  --bs-tertiary-bg-rgb: 24, 32, 28;
+  --bs-border-color: #2c3631;
+  --bs-success: #22c55e;
+  --bs-success-rgb: 34, 197, 94;
+  --bs-link-color: #4ade80;
+  --bs-link-color-rgb: 74, 222, 128;
+  --bs-link-hover-color: #86efac;
+  --bs-link-hover-color-rgb: 134, 239, 172;
+}
+
+/* Cards sit on a slightly lighter surface than the page in dark mode */
+[data-bs-theme="dark"] .card {
+  --bs-card-bg: var(--bs-tertiary-bg);
+}
+
+[data-bs-theme="dark"] .shadow-sm {
+  box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Smooth switch between light and dark */
+body,
+.card,
+.list-group-item,
+.form-control,
+.form-select {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}

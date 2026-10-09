@@ -1,0 +1,134 @@
+@let customer = customer$ | async;
+
+<!-- Greeting -->
+<div class="account-header rounded-4 p-4 p-md-5 mb-4 text-white d-flex flex-wrap justify-content-between align-items-center gap-3">
+  <div class="d-flex align-items-center gap-3">
+    <div class="avatar rounded-circle d-flex align-items-center justify-content-center fw-bold">
+      {{ (customer?.firstName || customer?.email || '?').charAt(0).toUpperCase() }}
+    </div>
+    <div>
+      <h1 class="h3 fw-bold mb-0">Hi, {{ customer?.firstName || 'there' }} 👋</h1>
+      <small class="opacity-75">{{ customer?.email }}</small>
+    </div>
+  </div>
+  <button type="button" class="btn btn-outline-light" (click)="logout()">Sign out</button>
+</div>
+
+<div class="row g-4">
+  <!-- ========== Profile (left on large screens) ========== -->
+  <div class="col-12 col-lg-4">
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+      <div class="card-body">
+        <h2 class="h6 text-uppercase text-muted mb-3">Profile</h2>
+        <dl class="mb-0 small">
+          <dt>Name</dt>
+          <dd>{{ customer?.displayName }}</dd>
+          <dt>Email</dt>
+          <dd class="text-break">{{ customer?.email }}</dd>
+          @if (customer?.phone) {
+            <dt>Phone</dt>
+            <dd>{{ customer?.phone }}</dd>
+          }
+          <dt>Member since</dt>
+          <dd class="mb-0">{{ customer?.createdAt | date: 'longDate' }}</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+      <div class="card-body">
+        <h2 class="h6 text-uppercase text-muted mb-3">Default address</h2>
+        @if (customer?.defaultAddress) {
+          <address class="small mb-0">
+            @for (line of customer?.defaultAddress?.formatted; track $index) {
+              {{ line }}<br>
+            }
+          </address>
+        } @else {
+          <p class="small text-muted mb-0">No address saved yet. It's saved automatically after your first order.</p>
+        }
+      </div>
+    </div>
+
+    <!-- Quick stats -->
+    @if (!isLoadingOrders && orders.length) {
+      <div class="row g-3">
+        <div class="col-6">
+          <div class="stat rounded-4 p-3 text-center">
+            <div class="fs-3 fw-bold">{{ orders.length }}</div>
+            <small class="text-muted">Orders</small>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="stat rounded-4 p-3 text-center">
+            <div class="fs-5 fw-bold">{{ totalSpent | currency: currencyCode }}</div>
+            <small class="text-muted">Total spent</small>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- ========== Order history ========== -->
+  <div class="col-12 col-lg-8">
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body">
+        <h2 class="h5 fw-bold mb-3">Order history</h2>
+
+        @if (isLoadingOrders) {
+          <div class="text-center py-5">
+            <div class="spinner-border text-success" role="status">
+              <span class="visually-hidden">Loading orders...</span>
+            </div>
+          </div>
+        } @else if (errorMessage) {
+          <div class="alert alert-danger mb-0">{{ errorMessage }}</div>
+        } @else {
+          <div class="list-group list-group-flush">
+            @for (order of orders; track order.id) {
+              <a class="list-group-item list-group-item-action order-row px-0 py-3"
+                [routerLink]="['/account/orders', order.orderNumber]">
+                <div class="row align-items-center g-2">
+                  <!-- Order number + date -->
+                  <div class="col-6 col-md-3">
+                    <div class="fw-bold">Order {{ order.name }}</div>
+                    <small class="text-muted">{{ order.processedAt | date: 'mediumDate' }}</small>
+                  </div>
+
+                  <!-- Product thumbnails (hidden on phones) -->
+                  <div class="col-md-3 d-none d-md-flex">
+                    @for (image of orderImages(order); track $index) {
+                      <img class="order-thumb rounded-circle" [src]="image" alt="">
+                    }
+                  </div>
+
+                  <!-- Status -->
+                  <div class="col-6 col-md-3 text-end text-md-start">
+                    <span class="badge {{ statusBadgeClass(order.financialStatus) }} me-1">{{ formatStatus(order.financialStatus) }}</span>
+                    <span class="badge {{ statusBadgeClass(order.fulfillmentStatus) }}">{{ formatStatus(order.fulfillmentStatus) }}</span>
+                  </div>
+
+                  <!-- Total -->
+                  <div class="col-12 col-md-3 d-flex d-md-block justify-content-between text-md-end">
+                    <small class="text-muted d-md-block">{{ orderItemCount(order) }} item(s)</small>
+                    <span class="fw-semibold">
+                      {{ toNumber(order.currentTotalPrice.amount) | currency: order.currentTotalPrice.currencyCode }}
+                      <span class="text-muted ms-1">›</span>
+                    </span>
+                  </div>
+                </div>
+              </a>
+            } @empty {
+              <div class="text-center py-5">
+                <p class="fs-1 mb-2">📦</p>
+                <h3 class="h6">No orders yet</h3>
+                <p class="text-muted small">When you place an order while signed in, it will show up here.</p>
+                <a class="btn btn-success" routerLink="/products">Start shopping</a>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,90 @@
+<div class="row justify-content-center py-md-4">
+  <div class="col-12 col-sm-10 col-md-7 col-lg-5">
+    <div class="card auth-card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4 p-md-5">
+
+        @if (mode === 'login') {
+          <h1 class="h3 fw-bold mb-1">Welcome back</h1>
+          <p class="text-muted mb-4">Sign in to see your orders and check out faster.</p>
+
+          @if (errorMessage) {
+            <div class="alert alert-danger small">{{ errorMessage }}</div>
+          }
+
+          <form #loginForm="ngForm" (ngSubmit)="onLogin(loginForm)" novalidate>
+            <div class="mb-3">
+              <label class="form-label" for="email">Email</label>
+              <input id="email" name="email" type="email" class="form-control form-control-lg"
+                [(ngModel)]="email" #emailField="ngModel" required email autocomplete="email"
+                [class.is-invalid]="emailField.invalid && emailField.touched">
+              <div class="invalid-feedback">Please enter a valid email.</div>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label" for="password">Password</label>
+              <div class="input-group input-group-lg has-validation">
+                <input id="password" name="password" class="form-control"
+                  [type]="showPassword ? 'text' : 'password'"
+                  [(ngModel)]="password" #passwordField="ngModel" required autocomplete="current-password"
+                  [class.is-invalid]="passwordField.invalid && passwordField.touched">
+                <button class="btn btn-outline-secondary" type="button" (click)="showPassword = !showPassword"
+                  [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
+                  {{ showPassword ? '🙈' : '👁️' }}
+                </button>
+                <div class="invalid-feedback">Please enter your password.</div>
+              </div>
+            </div>
+
+            <div class="text-end mb-4">
+              <button type="button" class="btn btn-link btn-sm p-0" (click)="setMode('recover')">Forgot password?</button>
+            </div>
+
+            <button type="submit" class="btn btn-success btn-lg w-100" [disabled]="isSubmitting">
+              @if (isSubmitting) {
+                <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> Signing in...
+              } @else {
+                Sign in
+              }
+            </button>
+          </form>
+
+          <p class="text-center text-muted mt-4 mb-0">
+            New here? <a routerLink="/account/register" class="fw-semibold">Create an account</a>
+          </p>
+        } @else {
+          <h1 class="h3 fw-bold mb-1">Reset password</h1>
+          <p class="text-muted mb-4">Enter your email and Shopify will send you a reset link.</p>
+
+          @if (errorMessage) {
+            <div class="alert alert-danger small">{{ errorMessage }}</div>
+          }
+          @if (successMessage) {
+            <div class="alert alert-success small">{{ successMessage }}</div>
+          }
+
+          <form #recoverForm="ngForm" (ngSubmit)="onRecover(recoverForm)" novalidate>
+            <div class="mb-4">
+              <label class="form-label" for="recoverEmail">Email</label>
+              <input id="recoverEmail" name="email" type="email" class="form-control form-control-lg"
+                [(ngModel)]="email" #recoverEmailField="ngModel" required email autocomplete="email"
+                [class.is-invalid]="recoverEmailField.invalid && recoverEmailField.touched">
+              <div class="invalid-feedback">Please enter a valid email.</div>
+            </div>
+
+            <button type="submit" class="btn btn-success btn-lg w-100" [disabled]="isSubmitting">
+              @if (isSubmitting) {
+                <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> Sending...
+              } @else {
+                Send reset link
+              }
+            </button>
+          </form>
+
+          <p class="text-center mt-4 mb-0">
+            <button type="button" class="btn btn-link p-0" (click)="setMode('login')">← Back to sign in</button>
+          </p>
+        }
+      </div>
+    </div>
+  </div>
+</div>
